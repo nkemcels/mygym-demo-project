@@ -12,3 +12,11 @@
 .container a {
   font-size: 1.4rem;
 }
+
+.webcamsTitle {
+  background-color: #212121;
+  color: whitesmoke;
+  padding: 5px 15px;
+  font-weight: bold;
+  text-transform: uppercase;
+}

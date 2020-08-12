@@ -1,0 +1,57 @@
+.webcam-device {
+    padding: 10px 20px;
+    background-color: white;
+    margin-top: 15px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    position: relative;
+    transition: all .2s;
+}
+
+.webcam-device:hover {
+    border: 1px solid #1890ff;
+    background-color: rgb(238, 245, 252);
+}
+
+.webcam-device.active {
+    border: 2px solid #20d681;
+    background-color: rgb(241, 253, 248);
+}
+
+.webcam-device.active::after {
+    content: "ACTIVE";
+    position: absolute;
+    top: -10px; right: -5px;
+    padding: 1px 7px;
+    background-color: #09d15d;
+    color: white;
+}
+
+.webcam-device .name {
+}
+
+.webcam-device .anticon {
+    font-size: 20px !important;
+    margin-right: 10px;
+}
+
+.display-container {
+    padding: 10px;
+    margin: 5px 20px 30px 0;
+    border: 3px solid #032e55;
+}
+.display-label {
+    font-weight: bold;
+}
+.display-label .display-dimens {
+    background-color: #1890ff;
+    color: whitesmoke;
+    padding: 1px 15px;
+    margin-left: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+}

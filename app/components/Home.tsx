@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Button } from 'antd';
+import { CameraOutlined } from '@ant-design/icons';
 import styles from './Home.css';
 import Block from './Utils/Block';
 import Header from './Header/Header';
@@ -21,7 +22,7 @@ export default function Home(): JSX.Element {
 
   const startWebcam = () => {
     startWebcamVideo(
-      // eslint-disable-next-line react/no-find-dom-node
+      // eslint-disable 
       ReactDOM.findDOMNode(videoNodeRef.current) as HTMLVideoElement,
       selectedDevice
         ? {
@@ -38,10 +39,14 @@ export default function Home(): JSX.Element {
     setSelectedDevice(device);
   };
 
-  useEffect(() => {
+  const refreshDevicesList = ()=> {
     getCameraDevices((cameras) => {
       setDevices(cameras);
     });
+  }
+
+  useEffect(() => {
+    refreshDevicesList()
   }, []);
 
   useEffect(() => {
@@ -50,23 +55,27 @@ export default function Home(): JSX.Element {
 
   return (
     <Block matchParent>
-      <Header />
+      <Header onRefreshDevices={refreshDevicesList} />
       <FlexBlock matchParent>
-        <FlexBlock flexOne alignCenter justifyCenter>
-          <Camera.Display videoRef={videoNodeRef} width="600" height="500" />
+        <FlexBlock flexOne alignCenter justifyCenter column>
+          <Camera.Display videoRef={videoNodeRef} width="600" currentDevice={selectedDevice} />
+          <Button type="primary" onClick={startWebcam} size="large"> <CameraOutlined /> DETECT FACE </Button>
         </FlexBlock>
-        <FlexBlock width={300}>
-          {devices.map((device, ind) => (
-            <Camera.CameraLabel
-              key={device?.deviceId}
-              deviceId={device.deviceId}
-              name={device?.deviceName}
-              onClick={() => onSetSelectedDevice(device)}
-            />
-          ))}
+        <FlexBlock column style={{paddingRight: "20px"}}>
+          <h3 className={styles.webcamsTitle}>Detected Webcams</h3>
+          <FlexBlock width={300} column flexOne style={{padding:"0 15px"}}>
+            {devices.map((device, ind) => (
+              <Camera.WebcamDevice
+                key={device?.deviceId}
+                deviceId={device.deviceId}
+                name={device?.deviceName}
+                isActive={selectedDevice?.deviceId == device?.deviceId}
+                onClick={() => onSetSelectedDevice(device)}
+              />
+            ))}
+          </FlexBlock>
         </FlexBlock>
       </FlexBlock>
-      <Button onClick={startWebcam}> START WEBCAM </Button>
     </Block>
   );
 }

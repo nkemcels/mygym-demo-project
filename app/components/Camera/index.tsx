@@ -1,7 +1,7 @@
 import Display from "./Display";
-import CameraLabel from "./DeviceLabel";
+import WebcamDevice from "./DeviceLabel";
 
 export default {
     Display,
-    CameraLabel,
+    WebcamDevice,
 }

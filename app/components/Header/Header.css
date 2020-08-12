@@ -1,0 +1,12 @@
+.header {
+    background-color: white;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+}
+
+.header .app-name {
+    color: #212121;
+    font-size: 20px;
+}
