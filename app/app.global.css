@@ -3,6 +3,7 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 @import '~@fortawesome/fontawesome-free/css/all.css';
+@import '~antd/dist/antd.min.css';
 
 body {
   position: relative;
@@ -44,4 +45,9 @@ a:hover {
   opacity: 1;
   text-decoration: none;
   cursor: pointer;
+}
+
+.match-parent {
+  width: 100%;
+  height: 100%;
 }
