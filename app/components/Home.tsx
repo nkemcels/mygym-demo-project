@@ -16,6 +16,7 @@ import {
 export default function Home(): JSX.Element {
   const [devices, setDevices] = useState<(CameraDevice | null)[]>([]);
   const [isCameraMode, setCameraMode] = useState<boolean>(true);
+  const [isProcessing, setProcessingImage] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<CameraDevice | null>(
     null
   );
@@ -23,7 +24,7 @@ export default function Home(): JSX.Element {
 
   const startWebcam = () => {
     startWebcamVideo(
-      // eslint-disable 
+      // eslint-disable
       ReactDOM.findDOMNode(videoNodeRef.current) as HTMLVideoElement,
       selectedDevice
         ? {
@@ -40,19 +41,30 @@ export default function Home(): JSX.Element {
     setSelectedDevice(device);
   };
 
-  const refreshDevicesList = ()=> {
+  const refreshDevicesList = () => {
     getCameraDevices((cameras) => {
       setDevices(cameras);
     });
-  }
+  };
 
   const cameraAction = () => {
+    if (isCameraMode) {
+      setProcessingImage(true);
+    }
     setCameraMode(!isCameraMode);
-  }
+  };
 
   useEffect(() => {
-    refreshDevicesList()
+    refreshDevicesList();
   }, []);
+
+  useEffect(() => {
+    if(!selectedDevice && devices[0]){
+      setTimeout(() => {
+        setSelectedDevice(devices[0])
+      }, 1000);
+    }
+  }, [devices])
 
   useEffect(() => {
     startWebcam();
@@ -63,18 +75,38 @@ export default function Home(): JSX.Element {
       <Header onRefreshDevices={refreshDevicesList} />
       <FlexBlock matchParent>
         <FlexBlock flexOne alignCenter justifyCenter column>
-          <Camera.Display videoRef={videoNodeRef} width="600" currentDevice={selectedDevice} isCameraMode={isCameraMode} />
-          <Button type="primary" onClick={cameraAction} size="large"> 
-            {isCameraMode ? 
-              <> <CameraOutlined /> DETECT FACE </>
+          <Camera.Display
+            videoRef={videoNodeRef}
+            width="600"
+            currentDevice={selectedDevice}
+            isCameraMode={isCameraMode}
+            onImageProcessComplete={() => setProcessingImage(false)}
+          />
+          <Button
+            type="primary"
+            onClick={cameraAction}
+            size="large"
+            loading={isProcessing}
+            disabled={isProcessing}
+          >
+            {isProcessing ?
+              "PLEASE WAIT..."
               :
-              <> <VideoCameraOutlined /> WEBCAM </>
+              isCameraMode ? (
+                <>
+                  <CameraOutlined /> DETECT FACE
+                </>
+              ) : (
+                <>
+                  <VideoCameraOutlined /> WEBCAM
+                </>
+              )
             }
           </Button>
         </FlexBlock>
-        <FlexBlock column style={{paddingRight: "20px"}}>
-          <h3 className={styles.webcamsTitle}>Detected Webcams</h3>
-          <FlexBlock width={300} column flexOne style={{padding:"0 15px"}}>
+        <FlexBlock column style={{ paddingRight: '20px' }}>
+          <h3 className={styles.webcamsTitle}>Available Webcams</h3>
+          <FlexBlock width={300} column flexOne style={{ padding: '0 15px' }}>
             {devices.map((device, ind) => (
               <Camera.WebcamDevice
                 key={device?.deviceId}

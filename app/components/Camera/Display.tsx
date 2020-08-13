@@ -20,6 +20,78 @@ type Props = {
   height?: CSS.Property.Height;
   currentDevice?: CameraDevice | null;
   isCameraMode?: boolean;
+  onImageProcessComplete?: () => void
+};
+
+const captureImage = (videoNode, videoDimens) => {
+  let canvasNode = document.createElement('canvas');
+  canvasNode.style.position = 'absolute';
+  canvasNode.style.top = '-99999px';
+  document.body.appendChild(canvasNode);
+  canvasNode.width = videoDimens.width;
+  canvasNode.height = videoDimens.height;
+
+  let canvasCtx = canvasNode.getContext('2d');
+  canvasCtx?.drawImage(videoNode, 0, 0);
+
+  return { data: canvasNode.toDataURL('image/jpeg'), canvasNode };
+};
+
+const detectFacesFromAPI = (dataURL, callbacks) => {
+  let data = dataURL.split(',')[1];
+  let mimeType = dataURL.split(';')[0].slice(5);
+
+  let bytes = window.atob(data);
+  let buf = new ArrayBuffer(bytes.length);
+  let byteArr = new Uint8Array(buf);
+
+  for (let i = 0; i < bytes.length; i++) {
+    byteArr[i] = bytes.charCodeAt(i);
+  }
+  axios
+    .post(`${AZURE_FACE_URL}/face/v1.0/detect`, byteArr, {
+      headers: {
+        'Ocp-Apim-Subscription-Key': AZURE_FACE_KEY,
+        'Content-Type': 'application/octet-stream',
+      },
+    })
+    .then((resp) => {
+      callbacks.forEach((callback: (arg0: any) => void) => {
+        callback(resp.data || []);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
+const drawFacesOnImage = (
+  imageCanvas: HTMLCanvasElement,
+  imageNode: HTMLImageElement
+) => {
+  return (facesData) => {
+    let canvasCtx = imageCanvas.getContext('2d');
+    facesData.forEach((face) => {
+      let faceRect = face['faceRectangle'];
+      canvasCtx?.beginPath();
+      canvasCtx!.strokeStyle = '#01f382';
+      canvasCtx!.lineWidth = 4;
+      canvasCtx?.rect(
+        faceRect.left,
+        faceRect.top,
+        faceRect.width,
+        faceRect.height
+      );
+      canvasCtx?.stroke();
+      canvasCtx?.closePath();
+      canvasCtx!.fillStyle = '#01f382';
+      canvasCtx!.font = '20px Verdana';
+      canvasCtx?.fillText('Face Detected', faceRect.left, faceRect.top - 10);
+    });
+    let dataURL = imageCanvas.toDataURL('image/jpeg');
+    imageNode.src = dataURL;
+    imageCanvas.remove();
+  };
 };
 
 const CameraDisplay = ({
@@ -28,11 +100,13 @@ const CameraDisplay = ({
   height,
   currentDevice,
   isCameraMode,
+  onImageProcessComplete,
 }: Props) => {
   const containerRef = useRef<any>();
   const capturedImgRef = useRef<any>();
   const [videoDimens, setVideoDimens] = useState({ width: 0, height: 0 });
   const [faceDisplay, setFaceDisplay] = useState(!isCameraMode);
+  const [isProcessingFace, setProcessingFace] = useState(false);
 
   useEffect(() => {
     let videoNode = ReactDOM.findDOMNode(videoRef?.current);
@@ -44,69 +118,33 @@ const CameraDisplay = ({
     let node = ReactDOM.findDOMNode(containerRef.current) as HTMLElement;
     if (!isCameraMode && node) {
       node.className = node.className + ' animate-snap';
+      setProcessingFace(true);
       setTimeout(() => {
         node.classList.remove('animate-snap');
         setFaceDisplay(true);
 
-        let canvasNode = document.createElement('canvas');
         let videoNode = ReactDOM.findDOMNode(
           videoRef?.current
         ) as HTMLVideoElement;
         let imageNode = ReactDOM.findDOMNode(
           capturedImgRef.current
         ) as HTMLImageElement;
-        canvasNode.style.position = 'absolute';
-        canvasNode.style.top = '-99999px';
-        document.body.appendChild(canvasNode);
-        canvasNode.width = videoDimens.width;
-        canvasNode.height = videoDimens.height;
 
-        let canvasCtx = canvasNode.getContext('2d');
-        canvasCtx?.drawImage(videoNode, 0, 0);
-
-        let dataURL = canvasNode.toDataURL('image/jpeg');
-        let data = dataURL.split(',')[1];
-        let mimeType = dataURL.split(';')[0].slice(5);
-
-        let bytes = window.atob(data);
-        let buf = new ArrayBuffer(bytes.length);
-        let byteArr = new Uint8Array(buf);
-
-        for (let i = 0; i < bytes.length; i++) {
-          byteArr[i] = bytes.charCodeAt(i);
-        }
+        let capture = captureImage(videoNode, videoDimens);
+        let dataURL = capture.data;
+        let canvasNode = capture.canvasNode;
 
         imageNode.src = dataURL;
 
         // let apiCall = remote.require('./components/Camera/api.ts').default;
-        axios
-          .post(`${AZURE_FACE_URL}/face/v1.0/detect`, byteArr, {
-            headers: {
-              'Ocp-Apim-Subscription-Key': AZURE_FACE_KEY,
-              'Content-Type': 'application/octet-stream',
-            },
-          })
-          .then((resp) => {
-            (resp.data || []).forEach(face => {
-              console.log("IMAGE WIDTH: ", canvasNode.width, ", IMAGE HEIGHT: ", canvasNode.height);
-              let faceRect = face["faceRectangle"];
-              canvasCtx?.beginPath();
-              canvasCtx!.strokeStyle = "#01f382"
-              canvasCtx!.lineWidth = 4;
-              canvasCtx?.rect(faceRect.left, faceRect.top, faceRect.width, faceRect.height);
-              canvasCtx?.stroke();
-              canvasCtx?.closePath();
-              canvasCtx!.fillStyle = "#01f382";
-              canvasCtx!.font = "20px Verdana";
-              canvasCtx?.fillText("Face Detected", faceRect.left, faceRect.top - 10)
-            });
-            let dataURL = canvasNode.toDataURL('image/jpeg');
-            imageNode.src = dataURL;
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+        detectFacesFromAPI(dataURL, [
+          drawFacesOnImage(canvasNode, imageNode),
+          () => setProcessingFace(false),
+          onImageProcessComplete
+        ]);
       }, 700);
+    } else if (isCameraMode) {
+      setFaceDisplay(false);
     }
   }, [isCameraMode]);
 
@@ -133,10 +171,15 @@ const CameraDisplay = ({
           autoPlay
           style={{ display: faceDisplay ? 'none' : undefined }}
         />
-        <img
-          ref={capturedImgRef}
+        <div
+          className="captured-image-container"
           style={{ display: faceDisplay ? undefined : 'none' }}
-        />
+        >
+          <img ref={capturedImgRef} />
+          <div className={`loading ${isProcessingFace ? 'active' : ''}`}>
+            Processing...
+          </div>
+        </div>
       </div>
     </Block>
   );

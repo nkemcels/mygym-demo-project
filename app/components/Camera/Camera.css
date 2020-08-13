@@ -60,10 +60,30 @@
     padding: 1px 15px;
     margin-left: 5px;
     border-radius: 3px;
-    cursor: pointer;
+    cursor: default;
 }
 
-@keyframes animateSnapContainer {
+.captured-image-container {
+    position: relative;
+}
+
+.captured-image-container .loading {
+    display: none;
+}
+
+.captured-image-container .loading.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgb(255, 136, 0);
+    font-weight: bold;
+    font-size: 25px;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background-color: rgba(8, 59, 117, 0.233);
+}
+
+@keyframes animateSnapContainer {                                            
     0% {
         transform: scale(1);
         opacity: 1;

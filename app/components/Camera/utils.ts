@@ -46,13 +46,11 @@ export const getCameraDevices = (
 
 export const startWebcamVideo = (videoNode: HTMLVideoElement, constraints = {video: true, audio: false}) => {
   stopMediaTracks(currentStream as MediaStream);
-  console.log("VIDEO NODE ", videoNode, ", constraints: ", constraints);
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then(stream => {
       currentStream = stream;
       videoNode.srcObject = stream;
-      console.log("STREAM ", stream, " VIDEO NODE ", videoNode);
     })
     .catch(error => {
       console.error(error);
