@@ -61,17 +61,18 @@ const CameraDisplay = ({
         canvasNode.width = videoDimens.width;
         canvasNode.height = videoDimens.height;
 
-        canvasNode.getContext('2d')?.drawImage(videoNode, 0, 0);
+        let canvasCtx = canvasNode.getContext('2d');
+        canvasCtx?.drawImage(videoNode, 0, 0);
 
         let dataURL = canvasNode.toDataURL('image/jpeg');
-        let data = dataURL.split(",")[1];
-        let mimeType = dataURL.split(";")[0].slice(5);
+        let data = dataURL.split(',')[1];
+        let mimeType = dataURL.split(';')[0].slice(5);
 
         let bytes = window.atob(data);
         let buf = new ArrayBuffer(bytes.length);
         let byteArr = new Uint8Array(buf);
-        
-        for(let i=0; i<bytes.length; i++){
+
+        for (let i = 0; i < bytes.length; i++) {
           byteArr[i] = bytes.charCodeAt(i);
         }
 
@@ -86,7 +87,20 @@ const CameraDisplay = ({
             },
           })
           .then((resp) => {
-            console.log('RESP ', resp);
+            (resp.data || []).forEach(face => {
+              console.log("IMAGE WIDTH: ", canvasNode.width, ", IMAGE HEIGHT: ", canvasNode.height);
+              let faceRect = face["faceRectangle"];
+              canvasCtx?.beginPath();
+              canvasCtx!.strokeStyle = "#01f382"
+              canvasCtx!.lineWidth = 5;
+              canvasCtx?.rect(faceRect.left, faceRect.top, faceRect.width, faceRect.height);
+              canvasCtx?.stroke();
+              canvasCtx?.closePath();
+              canvasCtx!.font = "30px Verdana";
+              canvasCtx?.fillText("Face Detected", faceRect.left, faceRect.top - 15)
+            });
+            let dataURL = canvasNode.toDataURL('image/jpeg');
+            imageNode.src = dataURL;
           })
           .catch((err) => {
             console.error(err);
