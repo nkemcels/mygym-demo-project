@@ -98,7 +98,7 @@ const CameraDisplay = ({
               canvasCtx?.closePath();
               canvasCtx!.fillStyle = "#01f382";
               canvasCtx!.font = "20px Verdana";
-              canvasCtx?.fillText("Face Detected", faceRect.left, faceRect.top - 15)
+              canvasCtx?.fillText("Face Detected", faceRect.left, faceRect.top - 10)
             });
             let dataURL = canvasNode.toDataURL('image/jpeg');
             imageNode.src = dataURL;
