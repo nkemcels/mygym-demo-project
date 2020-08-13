@@ -92,11 +92,12 @@ const CameraDisplay = ({
               let faceRect = face["faceRectangle"];
               canvasCtx?.beginPath();
               canvasCtx!.strokeStyle = "#01f382"
-              canvasCtx!.lineWidth = 5;
+              canvasCtx!.lineWidth = 4;
               canvasCtx?.rect(faceRect.left, faceRect.top, faceRect.width, faceRect.height);
               canvasCtx?.stroke();
               canvasCtx?.closePath();
-              canvasCtx!.font = "30px Verdana";
+              canvasCtx!.fillStyle = "#01f382";
+              canvasCtx!.font = "20px Verdana";
               canvasCtx?.fillText("Face Detected", faceRect.left, faceRect.top - 15)
             });
             let dataURL = canvasNode.toDataURL('image/jpeg');
