@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Button } from 'antd';
-import { CameraOutlined } from '@ant-design/icons';
+import { CameraOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import styles from './Home.css';
 import Block from './Utils/Block';
 import Header from './Header/Header';
@@ -15,6 +15,7 @@ import {
 
 export default function Home(): JSX.Element {
   const [devices, setDevices] = useState<(CameraDevice | null)[]>([]);
+  const [isCameraMode, setCameraMode] = useState<boolean>(true);
   const [selectedDevice, setSelectedDevice] = useState<CameraDevice | null>(
     null
   );
@@ -45,6 +46,10 @@ export default function Home(): JSX.Element {
     });
   }
 
+  const cameraAction = () => {
+    setCameraMode(!isCameraMode);
+  }
+
   useEffect(() => {
     refreshDevicesList()
   }, []);
@@ -58,8 +63,14 @@ export default function Home(): JSX.Element {
       <Header onRefreshDevices={refreshDevicesList} />
       <FlexBlock matchParent>
         <FlexBlock flexOne alignCenter justifyCenter column>
-          <Camera.Display videoRef={videoNodeRef} width="600" currentDevice={selectedDevice} />
-          <Button type="primary" onClick={startWebcam} size="large"> <CameraOutlined /> DETECT FACE </Button>
+          <Camera.Display videoRef={videoNodeRef} width="600" currentDevice={selectedDevice} isCameraMode={isCameraMode} />
+          <Button type="primary" onClick={cameraAction} size="large"> 
+            {isCameraMode ? 
+              <> <CameraOutlined /> DETECT FACE </>
+              :
+              <> <VideoCameraOutlined /> WEBCAM </>
+            }
+          </Button>
         </FlexBlock>
         <FlexBlock column style={{paddingRight: "20px"}}>
           <h3 className={styles.webcamsTitle}>Detected Webcams</h3>

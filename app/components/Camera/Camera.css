@@ -28,6 +28,8 @@
     top: -10px; right: -5px;
     padding: 1px 7px;
     background-color: #09d15d;
+    font-size: 10px;
+    font-weight: bold;
     color: white;
 }
 
@@ -41,9 +43,14 @@
 
 .display-container {
     padding: 10px;
-    margin: 5px 20px 30px 0;
+    margin: 5px 20px 15px 0;
     border: 3px solid #032e55;
 }
+
+.display-container.animate-snap {
+    animation: animateSnapContainer .3s;
+}
+
 .display-label {
     font-weight: bold;
 }
@@ -54,4 +61,19 @@
     margin-left: 5px;
     border-radius: 3px;
     cursor: pointer;
+}
+
+@keyframes animateSnapContainer {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        border-color: #032e55;
+    }
+
+    100% {
+        transform: scale(1.05);
+        opacity: 0.7;
+        border-color: #1890ff;
+        background-color: #1890ff;
+    }
 }

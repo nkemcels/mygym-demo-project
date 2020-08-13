@@ -12,7 +12,7 @@ const WebcamDevice = ({ name, deviceId, isActive, onClick }: Props) => {
   // eslint-disable-next-line
   return (
     <div className={`webcam-device ${isActive?"active":""}`} onClick={() => onClick(deviceId)}>
-      <VideoCameraOutlined /> 
+      <VideoCameraOutlined />
       <span className="name">{name?.substring(0, name.lastIndexOf("("))}</span>
     </div>
   );
